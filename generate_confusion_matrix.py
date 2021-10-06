@@ -1,5 +1,5 @@
 # USAGE
-# python test_contrastive_siamese_network.py --input examples
+# python generate_confusion_matrix.py --pre_trained yes
 
 # import the necessary packages
 from utilities import config
@@ -9,12 +9,20 @@ from imutils.paths import list_images
 from sklearn.metrics import confusion_matrix
 import matplotlib.pyplot as plt
 import numpy as np
+import pandas as pd
 import argparse
 import cv2
 import time
 from os import listdir
 from os.path import isfile, join
 import random
+
+ap = argparse.ArgumentParser()
+ap.add_argument("-p", "--pre_trained", required=False,
+    default='yes',
+	help="Specifiy whether you want to use the pretrained model or not")
+args_path = vars(ap.parse_args())
+
 
 args = {
     "input": "examples",
@@ -23,65 +31,68 @@ args = {
     "val": "images/val"
 }
 
-print("[INFO] loading siamese model...")
-model = load_model(config.MODEL_PATH, compile=False)
+print("[INFO] Creating Confusion Matrix...")
 
-GTs = []
-CW = []
-PR = []
+if args_path['pre_trained'] == 'no':
+  print("[INFO] loading siamese model...")
+  model = load_model(config.MODEL_PATH, compile=False)
 
-ImagePathsTrain = list(list_images(args["train"]))
-ImagePathsTest = list(list_images(args["test"]))
-ImagePathsVal = list(list_images(args["val"]))
+  GTs = []
+  CW = []
+  PR = []
 
-start = time.time()
+  ImagePathsTrain = list(list_images(args["train"]))
+  ImagePathsTest = list(list_images(args["test"]))
+  ImagePathsVal = list(list_images(args["val"]))
 
-# loop over all image pairs
-for (i, pathA) in enumerate(ImagePathsTest):
-  # load both the images and convert them to grayscale
-  for (j, pathB) in enumerate(ImagePathsTrain):
-    imageA = cv2.imread(pathA, 0)
-    imageB = cv2.imread(pathB, 0)
+  start = time.time()
 
-    # create a copy of both the images for visualization purpose
-    origA = imageA.copy()
-    origB = imageB.copy()
+  # loop over all image pairs
+  for (i, pathA) in enumerate(ImagePathsTest):
+    # load both the images and convert them to grayscale
+    for (j, pathB) in enumerate(ImagePathsTrain):
+      imageA = cv2.imread(pathA, 0)
+      imageB = cv2.imread(pathB, 0)
 
-    # add channel a dimension to both the images
-    imageA = np.expand_dims(imageA, axis=-1)
-    imageB = np.expand_dims(imageB, axis=-1)
+      # create a copy of both the images for visualization purpose
+      origA = imageA.copy()
+      origB = imageB.copy()
 
-    # add a batch dimension to both images
-    imageA = np.expand_dims(imageA, axis=0)
-    imageB = np.expand_dims(imageB, axis=0)
+      # add channel a dimension to both the images
+      imageA = np.expand_dims(imageA, axis=-1)
+      imageB = np.expand_dims(imageB, axis=-1)
 
-    # scale the pixel values to the range of [0, 1]
-    imageA = imageA / 255.0
-    imageB = imageB / 255.0
+      # add a batch dimension to both images
+      imageA = np.expand_dims(imageA, axis=0)
+      imageB = np.expand_dims(imageB, axis=0)
 
-    # use our siamese model to make predictions on the image pair,
-    # indicating whether or not the images belong to the same class
-    preds = model.predict([imageA, imageB])
-    proba = preds[0][0]
-    ground_truth = int(pathA.split('_')[0].split('/')[2])
-    compared_with = int(pathB.split('_')[0].split('/')[2])    
-    print(f'{i} - {pathA}, {pathB}, {ground_truth}, {compared_with}, {proba}')  
-    GTs.append(pathA)
+      # scale the pixel values to the range of [0, 1]
+      imageA = imageA / 255.0
+      imageB = imageB / 255.0
+
+      # use our siamese model to make predictions on the image pair,
+      # indicating whether or not the images belong to the same class
+      preds = model.predict([imageA, imageB])
+      proba = preds[0][0]
+      ground_truth = int(pathA.split('_')[0].split('/')[2])
+      compared_with = int(pathB.split('_')[0].split('/')[2])    
+      print(f'{i} - {pathA}, {pathB}, {ground_truth}, {compared_with}, {proba}')  
+      GTs.append(pathA)
+      
+      CW.append(pathB)
+      PR.append(proba)
     
-    CW.append(pathB)
-    PR.append(proba)
-  
-end = time.time()
-print(f'[INFO] Execution time = {end - start} seconds')
-
-
-df_summary = pd.DataFrame(
-    {'Ground Truth': GTs,
-     'Compared With': CW,
-     'Similarity': PR
-    })
-df_summary    
+  end = time.time()
+  print(f'[INFO] Execution time = {end - start} seconds')
+  df_summary = pd.DataFrame(
+      {'Ground Truth': GTs,
+      'Compared With': CW,
+      'Similarity': PR
+      })   
     
+else:
+  df_summary = pd.read_csv('pretrained_processed_data/df_summary.csv')
+
 top_k = 10
 
 df_group = df_summary.groupby(['Ground Truth', 'Compared With']).mean().sort_values(by='Similarity')
@@ -97,7 +108,13 @@ final_results = res.groupby(['Ground Truth']).agg(lambda x:x.value_counts().inde
 
 target_names = list(range(0,10))
 conf_mat = confusion_matrix(final_results['ID'], final_results['Predicted'])
-utils.plot_confusion_matrix(conf_mat, config.PLOT_PATH, target_names)
+
+try:
+  os.mkdir('output')
+except:
+  pass
+
+utils.plot_confusion_matrix(conf_mat, 'confusion_matrix_1.png', target_names)
 
 
 df_agg = df_summary.groupby(['Ground Truth', 'Compared With']).agg({'Similarity':sum})
@@ -111,4 +128,6 @@ t = res_2.groupby(['ID', 'Predicted']).mean().reset_index()
 out = t.sort_values('Similarity',ascending = False).groupby('ID').tail(1).sort_values(by='ID')
 out['GT'] = out['ID'].apply(lambda x: int(x.split('_')[0])).astype(str)
 conf_mat = confusion_matrix(out['GT'], out['Predicted'])
-utils.plot_confusion_matrix(conf_mat, config.PLOT_PATH, target_names)
+utils.plot_confusion_matrix(conf_mat, 'confusion_matrix_2.png', target_names)
+
+print('DONE')
