@@ -29,13 +29,13 @@ import matplotlib.pyplot as plt
 
 # construct the argument parser and parse the arguments
 ap = argparse.ArgumentParser()
-ap.add_argument("-i", "--image_type", required=True,
+ap.add_argument("-i", "--image_type", required=False,
     default="GramianAngularField",
 	help="Type of timeseries image representation, MarkovTransitionField, GramianAngularField & RecurrencePlot")
-ap.add_argument("-d", "--dimensions", required=True,
+ap.add_argument("-d", "--dimensions", required=False,
     default=128,
 	help="Type of timeseries image representation, MarkovTransitionField, GramianAngularField & RecurrencePlot")
-ap.add_argument("-w", "--wavelengths", required=True,
+ap.add_argument("-w", "--wavelengths", required=False,
     default=500,
 	help="Type of timeseries image representation, MarkovTransitionField, GramianAngularField & RecurrencePlot")
 
@@ -124,7 +124,6 @@ def preprocess(filter_x_cols, path, differentiate = False, train=True):
     if filter_x_cols is not None:
         data = data.iloc[:, : filter_x_cols]
 
-    print('Normalising...')
     x = data.values #returns a numpy array
 
     x = pd.DataFrame(x)
@@ -143,6 +142,8 @@ def preprocess(filter_x_cols, path, differentiate = False, train=True):
 train_df, trainY, orig_data_labels_train, key_hash_train = preprocess(int(args['wavelengths']), path = '24_samples/train', differentiate = True)
 #test_df, testY, orig_data_labels_test, key_hash_test = preprocess(first_x_colums, path = 'data3/test', differentiate = True, train=True)
 
+r, c = train_df.shape
+print(f'[INFO] Rows - {r} Columns - {c}')
 
 # Splitting Data
 train_df, test_df, trainY, testY = train_test_split(train_df, trainY, test_size=0.333, shuffle=False)
@@ -170,10 +171,10 @@ np.save('24_samples_testY.npy', testY)
 
 
 print('[INFO] Complete conversion to image matix')
-print(f'Train size {len(train_df)}')
-print(f'Test size {len(test_df)}')
-print(f'Unique classes in Training Data - {np.unique(np.array(trainY))}')
-print(f'Unique classes in Test Data - {np.unique(np.array(testY))}') 
+print(f'[INFO] Train size {len(train_df)}')
+print(f'[INFO] Test size {len(test_df)}')
+print(f'[INFO] Unique classes in Training Data - {np.unique(np.array(trainY))}')
+print(f'[INFO] Unique classes in Test Data - {np.unique(np.array(testY))}') 
 
 # Plot a single sample as a sanity check
 #row = train_df.iloc[0]
@@ -236,6 +237,6 @@ for (i,im) in enumerate(X_new):
 
 original_mapping_dict = dict(zip(orig_file, lab))
 
-
+print(f'[INFO] Image Dimensions - {resized_image.shape}')
 print("[INFO] Done")
 
