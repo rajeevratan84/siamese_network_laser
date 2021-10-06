@@ -1,5 +1,5 @@
 # USAGE
-# python test_contrastive_siamese_network.py --input examples
+# python test_contrastive_siamese_network.py
 
 # import the necessary packages
 from utilities import config
@@ -10,6 +10,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import argparse
 import cv2
+import os
 
 args = {
     "input": "examples",
@@ -28,11 +29,11 @@ for i in range(0,20):
     test_examples.append((args["test"]) + '/' + random.choice(onlyfiles))
 
 # grab the test dataset image paths and then randomly generate a
-# total of 10 image pairs
+# total of 20 image pairs
 print("[INFO] loading test dataset...")
 
 np.random.seed(42)
-pairs = np.random.choice(test_examples, size=(10, 2))
+pairs = np.random.choice(test_examples, size=(20, 2))
 
 # load the model from disk
 print("[INFO] loading siamese model...")
@@ -41,7 +42,7 @@ model = load_model(config.MODEL_PATH, compile=False)
 ImagePathsTrain = list(list_images(args["train"]))
 ImagePathsTest = list(list_images(args["test"]))
 ImagePathsVal = list(list_images(args["val"]))
-
+os.makedirs("comparison_plots", exist_ok=True) 
 # loop over all image pairs
 for (i, (pathA, pathB)) in enumerate(pairs):
     # load both the images and convert them to grayscale
@@ -86,4 +87,4 @@ for (i, (pathA, pathB)) in enumerate(pairs):
     plt.axis("off")
 
     # show the plot
-    plt.show()
+    fig.savefig(f'comparison_plots/comparison_{nameA}_{nameB}_{i}.png', dpi=fig.dpi)
