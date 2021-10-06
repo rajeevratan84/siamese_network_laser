@@ -12,6 +12,12 @@ import argparse
 import cv2
 import os
 
+ap = argparse.ArgumentParser()
+ap.add_argument("-p", "--pre_trained", required=False,
+    default='no',
+	help="Specifiy whether you want to use the pretrained model or not")
+args_path = vars(ap.parse_args())
+
 args = {
     "input": "examples",
     "test": "images/test",
@@ -37,7 +43,11 @@ pairs = np.random.choice(test_examples, size=(20, 2))
 
 # load the model from disk
 print("[INFO] loading siamese model...")
-model = load_model(config.MODEL_PATH, compile=False)
+
+if args_path['pre_trained'] == 'yes':
+  model = load_model('pretrained_siamese_model', compile=False)
+else:
+  model = load_model(config.MODEL_PATH, compile=False)
 
 ImagePathsTrain = list(list_images(args["train"]))
 ImagePathsTest = list(list_images(args["test"]))
