@@ -82,8 +82,8 @@ for (i, (pathA, pathB)) in enumerate(pairs):
 
     # initialize the figure
     fig = plt.figure("Pair #{}".format(i + 1), figsize=(4, 2))
-    nameA = int(pathA.split('_')[0].split('/')[2])
-    nameB = int(pathB.split('_')[0].split('/')[2])
+    nameA = pathA.split('_')[0].split('/')[2]
+    nameB = pathB.split('_')[0].split('/')[2]
     plt.suptitle(f'{nameA} compared to {nameB}. Similarity: {proba*100:.2f}%')
 
     # show first image
@@ -98,3 +98,4 @@ for (i, (pathA, pathB)) in enumerate(pairs):
 
     # show the plot
     fig.savefig(f'comparison_plots/comparison_{nameA}_{nameB}_{i}.png', dpi=fig.dpi)
+
