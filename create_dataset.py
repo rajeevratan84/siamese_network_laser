@@ -200,7 +200,7 @@ orig_labels_test = orig_data_labels_train[720:]
 im_data = []
 for (i,im) in enumerate(X_new):
     new_arr = ((im - im.min()) * (1/(im.max() - im.min()) * 255)).astype('uint8')
-    file_name = f'images/test/{orig_labels_test[i]}_{i}.jpg'
+    file_name = f'images/test/{orig_labels_test[i]}.jpg'
     resized_image = cv2.resize(new_arr, (int(args['dimensions']), int(args['dimensions']))) 
     im_data.append(resized_image)
     cv2.imwrite(file_name, resized_image)
@@ -212,7 +212,7 @@ X_new.shape
 im_data = []
 for (i,im) in enumerate(X_new):
     new_arr = ((im - im.min()) * (1/(im.max() - im.min()) * 255)).astype('uint8')
-    file_name = f'images/train/{orig_labels_train[i]}_{i}.jpg'
+    file_name = f'images/train/{orig_labels_train[i]}.jpg'
     resized_image = cv2.resize(new_arr, (int(args['dimensions']), int(args['dimensions']))) 
     im_data.append(resized_image)
     cv2.imwrite(file_name, resized_image)
@@ -230,7 +230,7 @@ orig_file = []
 
 for (i,im) in enumerate(X_new):
     new_arr = ((im - im.min()) * (1/(im.max() - im.min()) * 255)).astype('uint8')
-    file_name = f'images/test/{orig_labels_test[i]}_{i}.jpg'
+    file_name = f'images/test/{orig_labels_test[i]}.jpg'
     orig_file.append(f'{testY[i]}_{i}')
     resized_image = cv2.resize(new_arr, (int(args['dimensions']), int(args['dimensions']))) 
     im_data.append(resized_image)
@@ -240,5 +240,6 @@ original_mapping_dict = dict(zip(orig_file, lab))
 
 print(f'[INFO] Image Dimensions - {resized_image.shape}')
 print("[INFO] Done")
+
 
 
