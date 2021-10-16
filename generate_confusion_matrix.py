@@ -91,7 +91,7 @@ if args_path['pre_trained'] == 'no':
       })   
     
 else:
-  df_summary = pd.read_csv('pretrained_processed_data/df_summary.csv')
+  df_summary = pd.read_csv('pretrained_processed_data/df_summary_16_10_2021.csv')
 
 top_k = 10
 

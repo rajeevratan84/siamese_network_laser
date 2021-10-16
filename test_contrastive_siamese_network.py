@@ -45,7 +45,7 @@ pairs = np.random.choice(test_examples, size=(20, 2))
 print("[INFO] loading siamese model...")
 
 if args_path['pre_trained'] == 'yes':
-  model = load_model('pretrained_siamese_model', compile=False)
+  model = load_model('contrastive_siamese_model', compile=False)
 else:
   model = load_model(config.MODEL_PATH, compile=False)
 
