@@ -1,9 +1,8 @@
-# PyTorch Flask API
+# PyTorch Flask App 
 
+## Download pretrained Models
 
-Check the demo [here](https://pytorch-imagenet.herokuapp.com/).
-
-If you'd like to check a super simple API server, then check [this repo](https://github.com/avinassh/pytorch-flask-api).
+https://drive.google.com/file/d/1xeFv7c9TAsnMQwkx_LgC9R7_LB6TMrEW/view?usp=sharing
 
 
 ## Requirements
